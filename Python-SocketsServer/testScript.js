@@ -16,7 +16,8 @@ function initFunction(){
 }
 
 //TODO - reevaluate this, it doesn't seem necessary
-//subscripbe to the onOpen event instead.
+//subscripbe to the onOpen event instead for initlization logic
+//the socket will tell us when its ready
 async function initializeSocket(){
     socket = new WebSocket("ws://localhost:8765");
     startTime = (new Date()).getTime();
@@ -44,7 +45,8 @@ async function initializeSocket(){
 
     document.getElementsByTagName("body")[0].style.backgroundColor = 'white';
     socket.addEventListener('message', function(event){
-        console.log('Socket Received: ', event.data);
+        totalCount+=1;
+        //console.log('Socket Received: ', event.data);
     })
     socket.send("HELLO!")
 }
@@ -69,3 +71,23 @@ function simulateKill(){
 
 
 const connectSpinTime = 5000; //the time to spin waiting for a connection in milliseconds
+const burstTestTime = 5000; //the time of the burst test in milliseconds
+totalCount = 0;
+
+async function burstTest(){
+    console.log("Beginning burst test.");
+    totalCount = 0; //how many ping-pongs have occurred
+
+    startTime = (new Date()).getTime();
+
+    while((new Date()).getTime()-startTime < connectSpinTime)
+    {
+        socket.send("PING");
+    }
+    lclCount = totalCount; //grab a local copy in case the processor is still processing response
+    console.log("Burst Test Report:");
+    console.log("\tTotal time " + String(burstTest/1000) + "s")
+    console.log("\tTotal messages " + String(lclCount))
+    console.log("\tMessages per second " + String(lclCount/(burstTest/1000)))
+
+}
