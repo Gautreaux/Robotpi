@@ -1,3 +1,10 @@
-<p1>Testing the information in the console:</p1>
-<script src = "testScript.js"></script>
-<button type="button" onclick="testFunction()">Send a message.</button>
+<head>
+    <script src = "testScript.js"></script>
+</head>
+
+
+<body onload="initFunction()" onunload="cleanupFunction()" id="body">
+    <p1>Testing the information in the console:</p1>
+    <button type="button" onclick="testFunction()">Send a message.</button>
+    <button type="button" onclick="simulateKill()">Simulate kill.</button>
+</body>

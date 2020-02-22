@@ -1,13 +1,71 @@
 //jaja
 
-const socket = new WebSocket("ws://localhost:8765");
-
+socket = null;
 
 function testFunction(){
     console.log("Button clicked.");
-    socket.send("TEST");
+    socket.send("BUTTON");
+
 }
 
-socket.addEventListener('message', function(event){
-    console.log('Socket Received: ', event.data);
-})
+//called when the webpage is loaded
+function initFunction(){
+    document.getElementsByTagName("body")[0].style.backgroundColor = 'grey';
+    console.log("Socket Connecting");
+    initializeSocket();
+}
+
+//TODO - reevaluate this, it doesn't seem necessary
+//subscripbe to the onOpen event instead.
+async function initializeSocket(){
+    socket = new WebSocket("ws://localhost:8765");
+    startTime = (new Date()).getTime();
+    hasConnection = false;
+
+    while((new Date()).getTime()-startTime < connectSpinTime)
+    {
+        if(socket.readyState == 1)
+        {
+            hasConnection = true
+            break;
+        }
+
+        //sleep for 100 ms
+        await new Promise(r => setTimeout(r, 100));
+    }
+
+    if(!hasConnection)
+    {
+        //the connection failed to resolve
+        console.log("The connection could not be established in the given connection time.");
+        document.getElementsByTagName("body")[0].style.backgroundColor = "red";
+        return;
+    }
+
+    document.getElementsByTagName("body")[0].style.backgroundColor = 'white';
+    socket.addEventListener('message', function(event){
+        console.log('Socket Received: ', event.data);
+    })
+    socket.send("HELLO!")
+}
+
+//called when the webpage is unloaded via closure or reload
+function cleanupFunction(){
+    //send a goodbye message trigger any server side cleanup
+    socket.send("BYE-BYE"); 
+
+    //send a formal closure,
+    //NOTE - 1001 is closure by crash/navigation away, but in this instance
+    //  that is the standard closure behavior, which is why close 1000 (ok) is used
+    socket.close(1000, 'End of application, webpage closed.')
+
+    document.getElementsByTagName("body")[0].style.backgroundColor = "purple";
+}
+
+//do any logic to simulate the closure of a webpage (and thus websocket)
+function simulateKill(){
+    cleanupFunction();
+}
+
+
+const connectSpinTime = 5000; //the time to spin waiting for a connection in milliseconds
