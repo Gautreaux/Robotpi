@@ -48,7 +48,6 @@ function jsTouchStart(ev){
 
         joystickMaxMovement = (.5*(p-j));
     }
-
 }
 
 //called when ANY touch point is updated
@@ -85,8 +84,8 @@ function jsTouchMove(ev){
     }
     joystickDraw.style.left = String(myVector[0]*joystickMaxMovement);
     joystickDraw.style.top = String(myVector[1]*joystickMaxMovement);
-    console.log(myVector);
-
+    //console.log(myVector);
+    updateJoystickPosition(myVector[0], myVector[1])
 }
 
 //called when a touch point is removed
@@ -169,4 +168,5 @@ function resetJoystick(){
     joystickDraw.style.top = "0";
 
     //TODO - send msg to webserver
+    updateJoystickPosition(0,0);
 }

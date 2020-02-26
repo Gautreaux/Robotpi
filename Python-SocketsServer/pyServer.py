@@ -3,7 +3,7 @@
 import asyncio
 import websockets
 
-global globalCounter
+global globalCounter #to give each connection a unique value
 
 #this syntax loops until messages are done
 # async def consumer_handler(websocket, path):
@@ -12,31 +12,45 @@ global globalCounter
 
 async def hello(websocket, path):
     global globalCounter
-    msgID = globalCounter
+    clientID = globalCounter
     globalCounter+=1
-    print("Global counter: " + str(msgID))
+    print("New connection #" + str(clientID))
+    clientLogicalClock = 0 #what is the client's logical clock
     while True:
         #why does the server not wait here? but on send instead?
         try:
-            name = await websocket.recv()
+            msg = await websocket.recv()
         except websockets.exceptions.ConnectionClosedOK:
             return
         except:
             print("Another exception occurred.")
             return
 
-        print(f"{msgID}< {name}")
+        if(msg[0] != "J"):
+            print(f"Client #{clientID}< {msg}")
+            continue
 
-        greeting = f"Hello {name}! {msgID}"
+        #parse out the logical clock value
+        #note- this is not necessary if can guarantee in-order delivery
+        thisClock = int(msg[msg.find(" ")+1:msg.find(":")])
+        if(thisClock > clientLogicalClock):
+            clientLogicalClock = thisClock;
+            print(f"#{clientID}:{msg}")
+        else:
+            print(f"#{clientID}:received message out of order, ignoring.")
+
+        # greeting = f"Hello {msg}! {clientID}"
         try:
-            await websocket.send(greeting)
+            #comment out response for testing
+            #await websocket.send(greeting)
+            pass
         except websockets.exceptions.ConnectionClosedOK:
-            print(f"{msgID} was closed under normal conditions.")
+            print(f"Client #{clientID} was closed under normal conditions.")
             return
         except:
             print("Another exception occurred.")
             return
-        print(f"{msgID}> {greeting}")
+        # print(f"{clientID}> {greeting}")
 
 if __name__ == "__main__":
     global globalCounter

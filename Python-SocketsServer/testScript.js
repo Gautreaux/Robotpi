@@ -8,6 +8,8 @@ function testFunction(){
 
 }
 
+jsUpdateCounter = 0;
+
 //called when the webpage is loaded
 function initFunction(){
     document.getElementsByTagName("body")[0].style.backgroundColor = 'grey';
@@ -91,4 +93,16 @@ async function burstTest(){
     console.log("\tTotal messages " + String(lclCount))
     console.log("\tMessages per second " + String(lclCount/(burstTest/1000)))
 
+}
+
+
+function updateJoystickPosition(x, y)
+{
+    msg = "JSPos "+jsUpdateCounter+": (" + x + ", " + y + ")" 
+    // console.log(msg);
+    if(socket!=null)
+    {
+        socket.send(msg);
+    }
+    jsUpdateCounter++;
 }
