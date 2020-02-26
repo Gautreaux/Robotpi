@@ -22,7 +22,7 @@ function initFunction(){
 //subscripbe to the onOpen event instead for initlization logic
 //the socket will tell us when its ready
 async function initializeSocket(){
-    socket = new WebSocket("ws://localhost:8765");
+    socket = new WebSocket("ws://192.168.4.1:8765");
     startTime = (new Date()).getTime();
     hasConnection = false;
 

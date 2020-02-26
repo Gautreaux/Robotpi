@@ -26,23 +26,25 @@ async def hello(websocket, path):
             print("Another exception occurred.")
             return
 
-        if(msg[0] != "J"):
-            print(f"Client #{clientID}< {msg}")
+        if(msg[0] == "J"):
+            #parse out the logical clock value
+            #note- this is not necessary if can guarantee in-order delivery
+            thisClock = int(msg[msg.find(" ")+1:msg.find(":")])
+            if(thisClock > clientLogicalClock):
+                clientLogicalClock = thisClock;
+                print(f"#{clientID}:{msg}")
+            else:
+                print(f"#{clientID}:received message out of order, ignoring.")
             continue
 
-        #parse out the logical clock value
-        #note- this is not necessary if can guarantee in-order delivery
-        thisClock = int(msg[msg.find(" ")+1:msg.find(":")])
-        if(thisClock > clientLogicalClock):
-            clientLogicalClock = thisClock;
-            print(f"#{clientID}:{msg}")
-        else:
-            print(f"#{clientID}:received message out of order, ignoring.")
+        print(f"Client #{clientID}< {msg}")
 
-        # greeting = f"Hello {msg}! {clientID}"
+        
+
+        greeting = f"ECHO {clientID}:{msg}"
         try:
             #comment out response for testing
-            #await websocket.send(greeting)
+            await websocket.send(greeting)
             pass
         except websockets.exceptions.ConnectionClosedOK:
             print(f"Client #{clientID} was closed under normal conditions.")
@@ -50,13 +52,18 @@ async def hello(websocket, path):
         except:
             print("Another exception occurred.")
             return
-        # print(f"{clientID}> {greeting}")
+        print(f"{clientID}> {greeting}")
 
 if __name__ == "__main__":
     global globalCounter
     globalCounter = 0
 
-    start_server = websockets.serve(hello, "localhost", 8765)
+    hostname = "0.0.0.0"
+    port = 8765
+
+    start_server = websockets.serve(hello, hostname, port)
+
+    print(f"Server ready to accept connections on {hostname}:{port}")
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
