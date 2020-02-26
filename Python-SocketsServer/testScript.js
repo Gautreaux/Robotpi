@@ -1,4 +1,4 @@
-//jaja
+//this file manages the js related to the socket communication
 
 socket = null;
 
@@ -13,6 +13,7 @@ function initFunction(){
     document.getElementsByTagName("body")[0].style.backgroundColor = 'grey';
     console.log("Socket Connecting");
     initializeSocket();
+    initializeJoystick();
 }
 
 //TODO - reevaluate this, it doesn't seem necessary

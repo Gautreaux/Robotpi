@@ -1,0 +1,114 @@
+Basic Framework
+    The pi first broadcasts a wifi network
+    The pi then shall establish a webserver locally
+    The pi shall finally establish a program running its end of the communication
+        protocol specified below
+    Clients may connect to this network
+    While on the network, any web request made by the client shall be redirected
+        to the pi's local webserver 
+        This excludes any request made through the communication protocol,
+            which shall be designated by an agreed on port.
+    The webserver will serve a webapp to the client device which will perform
+        the communication protocol specified below
+    The client and pi will communicate through the protocol that follows
+
+Communication protocol
+    The pi shall be ready to receive a websockets connection on some port P
+        the websockets protocol (RFC 6455 https://tools.ietf.org/html/rfc6455) shall be used
+    
+    The webapp shall initiate the communication using a javascript websockets at load
+        The webapp will be pre-configured with port N 
+        Initial communication shall consist of declaration of intent to take control
+
+    Shall respond to the intent to take control in one of two ways
+        1. As control is an inherently exclusive resource, the server
+            may place the client in a control queue and notify the 
+            client of such a condition
+        2. The server may bypass the control queue and instead directly 
+            grant the client control (see below) and begin the control phase
+        
+    Any client may disconnect at any time, triggering one of the following
+        1. If the client was awaiting control, the client is removed from the control queue
+        2. If the client holds the control resource
+            2a. The control resource is reverted to a neutral state
+            2b. Any robot motion is halted immediately. Such actions may require
+                    consideration of what real time conditions can be guaranteed
+                    by the control board/language
+            2c. The server selects a new client from the control queue and grants
+                them control (see below)
+    
+    Granting a client control
+        When the server decides that some client C is to begin control, the client
+            is first notified of their promotion
+        Next, the client may begin issuing commands to the robot via command specification
+        The client may relinquish control only via closing the websockets connection
+    
+    Cleint-Server communication protocol:
+        The client-server protocol shall utilize binary data to communicate
+        Messages shall be formatted as follows:
+        The first bit will be the command bit, one of the following
+            0 - Reserved (unused)
+            1 - Initial connection
+            2 - Promotion to control
+            3-4 - Unused
+            5 - Send Text (string) information
+            6 - Send binary Integer information
+            7 - Send binary Double information
+            8-9 - unused
+            10 - Set DC motor output
+            11-255 - unused
+        
+        The messages shall have parameters configured as:
+            0 - Reserved
+            1 - Initial connection
+                The second bit shall be one of 
+                    0 - Success - Enqueue (client is queued)
+                    1 - Success - Control (client is in control)
+                    3-7 - Unused
+                    8 - Unknown Error
+                    9 - Full Queue
+            2 - Promotion to control
+                The client has been promoted to control position
+            
+            TODO - Finish
+            DC motors: first byte - bit mask motor groups, second byte - bit mask motors within group(s) specified
+            
+
+
+    TODO - testing:
+        How robust is the websockets protocol? Can the client be lost without the 
+            websockets knowing? --if so, need to switch to a lease configuration where
+            commands are issued periodically for some time unless preempted
+        Does the websockets protocol guarantee in-order delivery of messages?
+        Does the websockets protocol manage the length of data (for like strings)
+
+    Dev ideas:
+        If in order delivery is not guaranteed, need to use a logical clock to limit rate
+        This will require a command to specify the reset value of the logical clock
+            but how do we do that?
+            Option 1 - just use more bits: assume 1000 msgs per second
+                8bit - overflows 4 times per second
+                16bit - overflows every 6 seconds
+                32bit - overflows every 49.7 days of runtime
+            Option 2 - implement a reset control
+                The server and client somehow negotiate the resetting of a logical clock
+                How to handel packet loss and/or out of order?
+                Thoughts
+                    The client initiates a reset, sends all future messages in special vector range
+                    The server says - ok im ready
+                    The client then starts sending in a new lower range
+
+                    EX:
+                        0 is intent to reset signal, msg > 200 is Reserved
+                        Normally client sends messages in range 1..100
+                        when crossing 100, sends a 0 message to start reset
+                        All future messages are sent with 200.. until confirmation from server received
+                        Upon receiving, start sending messages in 1..100
+
+                        This then asserts that 1..100 -> 0 -> 200.. -> 1..100
+                        Just need some synchronous guarantee that a 200 couldn't be lost during one reset and reappear in the next
+            Frames are guaranteed to appear in order
+
+        
+
+    --TODO Finish
