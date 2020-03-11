@@ -112,3 +112,13 @@ Communication protocol
         
 
     --TODO Finish
+    we should move to a leasing model:
+        we still send position updates immediately, however
+        a position is only good for some n seconds where n is 
+        a small (2-5) multiple of the heartbeat frequency
+    should the heartbeat include values?
+        pros:
+            the leases are always up to date with the desired motor values
+        cons:
+            if a stop is lost, and the lease is continuing, what happens
+            and, will the message be lost (specifically, can the stop be lost but not the heartbeat)
