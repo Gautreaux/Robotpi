@@ -55,19 +55,17 @@ div{
 .marker{
     height: 20px;
     width: 20px;
-    position: absolute;
     background-color: black;
-
-    transform: translate(-50%, -50%);
+    position: absolute;
+    transform: translate(50%, 50%);
     border-radius: 50%;
 }
 
 .markerCollider{
     height: 40px;
     width: 40px;
-    position: absolute;
     /* background-color:rgba(0, 255, 0, .5); */
-
+    position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 50%;
 }
