@@ -1,22 +1,17 @@
 <head>
-
+    <script src="sliderScript.js"></script>
     <link rel="stylesheet" href="sliderStyles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 </head>
 
-<body id="body">
+<body id="body" onload="initFunction()" onunload="cleanupFunction()">
     <table>
         <tr>
             <td>
-                
-            </td>
-            <td>
-
-            </td>
-            <td>
                 <div class="sliderTrack">
-                    <div class="marker"></div>
-                    <div class="markerCollider"></div>
+                    <div class="markerCollider">
+                        <div class="marker"></div>
+                    </div>
                 </div>
                 <div class="annotationTrack">
                     <div class="upperLimit">
@@ -29,10 +24,60 @@
                         -100%
                     </div>
                 </div>
-
             </td>
             <td>
-
+                <div class="sliderTrack">
+                    <div class="markerCollider">
+                        <div class="marker"></div>
+                    </div>
+                </div>
+                <div class="annotationTrack">
+                    <div class="upperLimit">
+                        100%
+                    </div>
+                    <div class="neutralLimit">
+                        0%
+                    </div>
+                    <div class="lowerLimit">
+                        -100%
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="sliderTrack">
+                    <div class="markerCollider">
+                        <div class="marker"></div>
+                    </div>
+                </div>
+                <div class="annotationTrack">
+                    <div class="upperLimit">
+                        100%
+                    </div>
+                    <div class="neutralLimit">
+                        0%
+                    </div>
+                    <div class="lowerLimit">
+                        -100%
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="sliderTrack">
+                    <div class="markerCollider">
+                        <div class="marker"></div>
+                    </div>
+                </div>
+                <div class="annotationTrack">
+                    <div class="upperLimit">
+                        100%
+                    </div>
+                    <div class="neutralLimit">
+                        0%
+                    </div>
+                    <div class="lowerLimit">
+                        -100%
+                    </div>
+                </div>
             </td>
         </tr>
     </table>
