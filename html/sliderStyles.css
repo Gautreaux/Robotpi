@@ -55,7 +55,7 @@ div{
 .marker{
     height: 20px;
     width: 20px;
-    background-color: black;
+    background-color: rgba(0, 0, 0, .6);
     position: absolute;
     transform: translate(50%, 50%);
     border-radius: 50%;
