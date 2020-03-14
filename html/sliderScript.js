@@ -21,28 +21,26 @@ function cleanupFunction() {
 //FIXME - slider scoping issues? wrong element moving
 //function factory for creating touch start instances
 function sliderStartBuilder(element, id) {
+
     //create the scoped items:
     sliderTouchIdentifier = null;
     sliderTouchStartLocation = null;
 
     //TODO
-    moveFunction = function(ev){
+    moveFunction = function (ev) {
         ev.preventDefault(); //prevent secondary mouse click events
 
-        console.log("move " + String(id));
+        // console.log("move " + String(id));
 
         myTouch = null;
-        for(i = 0; i < ev.targetTouches.length; i++)
-        {
-            if(ev.targetTouches[i].identifier == sliderTouchIdentifier)
-            {
+        for (i = 0; i < ev.targetTouches.length; i++) {
+            if (ev.targetTouches[i].identifier == sliderTouchIdentifier) {
                 myTouch = ev.targetTouches[i];
                 break;
             }
         }
-        
-        if(myTouch == null)
-        {
+
+        if (myTouch == null) {
             //the master touch could not be found,
             //which should not be possible since the event is unregistered once it ends
             return;
@@ -50,46 +48,50 @@ function sliderStartBuilder(element, id) {
 
         //find the maximum height and the mid point
         sliderLength = element.parentElement.clientHeight;
-        sliderMidpoint = element.parentElement.parentElement.clientHeight/2.0;
+        sliderMidpoint = element.parentElement.parentElement.clientHeight / 2.0;
 
         nowY = myTouch.clientY;
 
-        console.log(nowY);
-        val = (sliderMidpoint-nowY)/sliderLength;
+        // console.log(nowY);
+        val = (sliderMidpoint - nowY) / sliderLength*2;
 
-        setSliderToValue(element, val)
+        //bound the result
+        if(val > 1){val = 1;}
+        else if(val < -1){val = -1;}
+
+        setSliderToValue(this.parentElement, val)
         broadcastNewValue(id, val);
 
     }
 
-    startFunction = function(ev){
+    startFunction = function (ev) {
         ev.preventDefault(); //prevent secondary mouse click events
-        
-        console.log("Touch started on " + String(id));
 
-        if(ev.targetTouches.length != 0 && sliderTouchIdentifier == null){
+        // console.log("Touch started on " + String(id));
+
+        if (ev.targetTouches.length != 0 && sliderTouchIdentifier == null) {
 
             //assign the first targeting touch point as the value
             myTouch = ev.targetTouches[0];
             sliderTouchIdentifier = myTouch.identifier;
             sliderTouchStartLocation = [myTouch.clientX, myTouch.clientY];
-    
+
             element.addEventListener('touchmove', moveFunction, false);
-            
+
             //need to log the range of motion (how much can the slider move?):
             //the max movement has the joystick tangent to the top of the joystick box
             //just assuming that the items are both squares
         }
     }
 
-    resetSlider = function(){
+    resetSlider = function () {
         sliderTouchIdentifier = null;
         sliderTouchStartLocation = null;
     }
 
     //TODO
     endFunction = function (ev) {
-        console.log("touch Ended " + String(id));
+        // console.log("touch Ended " + String(id));
 
         ev.preventDefault(); //prevent secondary mouse click events
 
@@ -127,7 +129,7 @@ function sliderStartBuilder(element, id) {
 
         //check error conditions
         if (myTouch == null) {
-            console.log("On slider release, could not find matching touch identifier.");
+            // console.log("On slider release, could not find matching touch identifier.");
             //reset the object so that error is 'fixed'
             resetSlider();
             return;
@@ -135,7 +137,7 @@ function sliderStartBuilder(element, id) {
 
         //FIXME
         endPosition = [myTouch.clientX, myTouch.clientY];
-        console.log(id + ":" + sliderTouchStartLocation + "->" + endPosition);
+        // console.log(id + ":" + sliderTouchStartLocation + "->" + endPosition);
         resetSlider();
 
     }
@@ -146,8 +148,7 @@ function sliderStartBuilder(element, id) {
 
 //should take first the sliderTrack element, and second the value in range [-1,1]
 function setSliderToValue(slider, value) {
-    if(Math.abs(value) > 1)
-    {
+    if (Math.abs(value) > 1) {
         console.log("Attempted to set slider to illegal value: " + String(value));
         value = 0;
     }
@@ -159,10 +160,10 @@ function setSliderToValue(slider, value) {
     ans = 0.0;
 
     //map value so that 0 - top limit, .5 - middle, 1 - bottom limit
-    ans = totalHeight*(((1-value))/2.0);
+    ans = totalHeight * (((1 - value)) / 2.0);
 
     //do the base offset for the slider
-    ans += (parentHeight-totalHeight)/2.0;
+    ans += (parentHeight - totalHeight) / 2.0;
 
     c.style.top = String(ans);
 }
@@ -176,6 +177,6 @@ function setAllSlidersToValue(value) {
     }
 }
 
-function broadcastNewValue(id, val){
-    console.log("Slider " + String(id) + ": " + String(val));
+function broadcastNewValue(id, val) {
+    console.log("Broadcast - Slider " + String(id) + ": " + String(val));
 }
