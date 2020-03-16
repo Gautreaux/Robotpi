@@ -1,4 +1,4 @@
-function initFunction() {
+function sliderInit() {
     // console.log("Initialized");
     setAllSlidersToValue(0);
 
@@ -6,11 +6,13 @@ function initFunction() {
 
     var key = 0;
     for (element of sliders) {
-        sliderStartBuilder(element, key);
+        broadcastNewValue(key, 0);
+        sliderStartBuilder(element, key.valueOf())
         // element.addEventListener('touchstart', sliderStartBuilder(element, key), false);
 
         key += 1;
     }
+    key = -1; //this is to help debugging when there are weird references
 }
 
 function cleanupFunction() {
@@ -18,19 +20,23 @@ function cleanupFunction() {
 }
 
 
-//FIXME - slider scoping issues? wrong element moving
 //function factory for creating touch start instances
-function sliderStartBuilder(element, id) {
+//BIG ERROR- FIXME - in move, element is always the last one
+//  i.e. this only works because all are same hight and only one touch at a time
+function sliderStartBuilder(element, myId) {
+    //id definitely varies on input
+    //but due to some closure bs, it is persistent across calls?
 
+    console.log(myId)
     //create the scoped items:
-    sliderTouchIdentifier = null;
-    sliderTouchStartLocation = null;
+    let sliderTouchIdentifier = null;
+    let sliderTouchStartLocation = null;
 
     //TODO
-    moveFunction = function (ev) {
+    let moveFunction = function (ev) {
         ev.preventDefault(); //prevent secondary mouse click events
 
-        // console.log("move " + String(id));
+        // console.log("move " + String(myId));
 
         myTouch = null;
         for (i = 0; i < ev.targetTouches.length; i++) {
@@ -47,27 +53,29 @@ function sliderStartBuilder(element, id) {
         }
 
         //find the maximum height and the mid point
-        sliderLength = element.parentElement.clientHeight;
-        sliderMidpoint = element.parentElement.parentElement.clientHeight / 2.0;
+        sliderLength = this.parentElement.clientHeight;
+        sliderMidpoint = this.parentElement.parentElement.clientHeight / 2.0;
 
         nowY = myTouch.clientY;
 
         // console.log(nowY);
-        val = (sliderMidpoint - nowY) / sliderLength*2;
+        val = (sliderMidpoint - nowY) / sliderLength * 2;
 
         //bound the result
-        if(val > 1){val = 1;}
-        else if(val < -1){val = -1;}
+        if (val > 1) { val = 1; }
+        else if (val < -1) { val = -1; }
+        //also add a small deadzone to make stopping easier
+        if (Math.abs(val) < .05) { val = 0; }
 
         setSliderToValue(this.parentElement, val)
-        broadcastNewValue(id, val);
+        broadcastNewValue(myId.valueOf(), val);
 
     }
 
-    startFunction = function (ev) {
+    let startFunction = function (ev) {
         ev.preventDefault(); //prevent secondary mouse click events
 
-        // console.log("Touch started on " + String(id));
+        // console.log("Touch started on " + String(myId));
 
         if (ev.targetTouches.length != 0 && sliderTouchIdentifier == null) {
 
@@ -90,8 +98,8 @@ function sliderStartBuilder(element, id) {
     }
 
     //TODO
-    endFunction = function (ev) {
-        // console.log("touch Ended " + String(id));
+    let endFunction = function (ev) {
+        // console.log("touch Ended " + String(myId));
 
         ev.preventDefault(); //prevent secondary mouse click events
 
@@ -137,13 +145,14 @@ function sliderStartBuilder(element, id) {
 
         //FIXME
         endPosition = [myTouch.clientX, myTouch.clientY];
-        // console.log(id + ":" + sliderTouchStartLocation + "->" + endPosition);
+        // console.log(myId + ":" + sliderTouchStartLocation + "->" + endPosition);
         resetSlider();
 
     }
 
     element.addEventListener('touchstart', startFunction, false);
     element.addEventListener('touchend', endFunction, false);
+
 }
 
 //should take first the sliderTrack element, and second the value in range [-1,1]
@@ -175,8 +184,4 @@ function setAllSlidersToValue(value) {
     for (element of sliders) {
         setSliderToValue(element, value);
     }
-}
-
-function broadcastNewValue(id, val) {
-    console.log("Broadcast - Slider " + String(id) + ": " + String(val));
 }
