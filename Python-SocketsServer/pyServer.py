@@ -2,6 +2,7 @@
 
 import asyncio
 import websockets
+from adafruit_motorkit import MotorKit
 
 global globalCounter #to give each connection a unique value
 
@@ -16,43 +17,52 @@ async def hello(websocket, path):
     globalCounter+=1
     print("New connection #" + str(clientID))
     clientLogicalClock = 0 #what is the client's logical clock
+
+    kit = MotorKit()
+    motorList = [kit.motor1, kit.motor2, kit.motor3, kit.motor4]
+
     while True:
         #why does the server not wait here? but on send instead?
         try:
             msg = await websocket.recv()
         except websockets.exceptions.ConnectionClosedOK:
             return
-        except:
-            print("Another exception occurred.")
+        except Exception as e:
+            print("Another exception occurred: " + str(e))
             return
 
-        if(msg[0] == "J"):
-            #parse out the logical clock value
-            #note- this is not necessary if can guarantee in-order delivery
-            thisClock = int(msg[msg.find(" ")+1:msg.find(":")])
-            if(thisClock > clientLogicalClock):
-                clientLogicalClock = thisClock;
-                print(f"#{clientID}:{msg}")
-            else:
-                print(f"#{clientID}:received message out of order, ignoring.")
-            continue
+        #if(msg[0] == "J"):
+        #    #parse out the logical clock value
+        #    #note- this is not necessary if can guarantee in-order delivery
+        #    thisClock = int(msg[msg.find(" ")+1:msg.find(":")])
+        #    if(thisClock > clientLogicalClock):
+        #        clientLogicalClock = thisClock;
+        #        print(f"#{clientID}:{msg}")
+        #    else:
+        #        print(f"#{clientID}:received message out of order, ignoring.")
+        #    continue
 
-        print(f"Client #{clientID}< {msg}")
-
+        #print(f"Client #{clientID}< {msg}")
+    
+        motorID = int(msg[0])
+        pwr = float(msg[1:])
         
+        #print(f"Setting motor {motorID} to power {pwr}")
 
-        greeting = f"ECHO {clientID}:{msg}"
+        motorList[motorID].throttle = pwr
+
+        #greeting = f"ECHO {clientID}:{msg}"
         try:
             #comment out response for testing
-            await websocket.send(greeting)
+            #await websocket.send(greeting)
             pass
         except websockets.exceptions.ConnectionClosedOK:
             print(f"Client #{clientID} was closed under normal conditions.")
             return
-        except:
-            print("Another exception occurred.")
+        except Exception as e:
+            print("Another exception occurred: " + str(e))
             return
-        print(f"{clientID}> {greeting}")
+        #print(f"{clientID}> {greeting}")
 
 if __name__ == "__main__":
     global globalCounter

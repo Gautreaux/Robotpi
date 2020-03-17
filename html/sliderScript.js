@@ -27,7 +27,7 @@ function sliderStartBuilder(element, myId) {
     //id definitely varies on input
     //but due to some closure bs, it is persistent across calls?
 
-    console.log(myId)
+    // console.log(myId)
     //create the scoped items:
     let sliderTouchIdentifier = null;
     let sliderTouchStartLocation = null;
@@ -92,7 +92,7 @@ function sliderStartBuilder(element, myId) {
         }
     }
 
-    resetSlider = function () {
+    let resetSlider = function () {
         sliderTouchIdentifier = null;
         sliderTouchStartLocation = null;
     }

@@ -4,8 +4,9 @@ function initFunction(){
 
     document.getElementsByTagName("body")[0].style.backgroundColor = 'darkgoldenrod';
 
+    const socket = new WebSocket("ws://192.168.1.84:8765");
     // const socket = new WebSocket("ws://192.168.4.1:8765");
-    const socket = new WebSocket("ws://localhost:8765")
+    // const socket = new WebSocket("ws://localhost:8765")
     socket.onopen = onSocketOpen;
     socket.onerror = onSocketError;
     socket.onmessage = onSocketReceive;
@@ -18,7 +19,7 @@ function onSocketOpen(event){
 
     document.getElementsByTagName("body")[0].style.backgroundColor = 'darkgreen';
 
-    broadcastNewValue = broadcastPostConnection
+    broadcastNewValue = broadcastPostConnection(this)
 
     sliderInit();
 }
@@ -36,6 +37,8 @@ function onSocketError(event){
 
 //called on a standard socket close (i.e. server shutdown)
 function onSocketClose(event){
+    console.log("Socket Closed under normal conditions");
+    document.getElementsByTagName("body")[0].style.backgroundColor = 'darkgray';
 //TODO
 }
 
@@ -52,32 +55,32 @@ function broadcastNewValue(id, val) {
 //returns a function that
 //  send an update for motor ID to become value val
 //  used after a successful connection established
-// function broadcastPostConnection(inSocket) {
-//     return function (id, val) {
-//         if (id < 0 || id >= 4) {
-//             console.log("Unknown motor ID: " + String(id) + ". Should be integer in [0,3]");
-//             return;
-//         }
-//         if (Math.abs(val) > 1) {
-//             console.log("Illegal motor value: " + String(val) + ". Should be float in [-1,1]");
-//             return;
-//         }
+function broadcastPostConnection(inSocket) {
+    return function (id, val) {
+        if (id < 0 || id >= 4) {
+            console.log("Unknown motor ID: " + String(id) + ". Should be integer in [0,3]");
+            return;
+        }
+        if (Math.abs(val) > 1) {
+            console.log("Illegal motor value: " + String(val) + ". Should be float in [-1,1]");
+            return;
+        }
 
-//         console.log("Outgoing update: (" + id + ", " + val + ")");
-//         // inSocket.send(String(id) + String(val));
-//     }
-// }
-
-function broadcastPostConnection(id, val) {
-    if (id < 0 || id >= 4) {
-        console.log("Unknown motor ID: " + String(id) + ". Should be integer in [0,3]");
-        return;
+        // console.log("Outgoing update: (" + id + ", " + val + ")");
+        inSocket.send(String(id) + String(val));
     }
-    if (Math.abs(val) > 1) {
-        console.log("Illegal motor value: " + String(val) + ". Should be float in [-1,1]");
-        return;
-    }
-
-    console.log("Outgoing update: (" + id + ", " + val + ")");
-    // inSocket.send(String(id) + String(val));
 }
+
+//function broadcastPostConnection(id, val) {
+//    if (id < 0 || id >= 4) {
+//        console.log("Unknown motor ID: " + String(id) + ". Should be integer in [0,3]");
+//        return;
+//    }
+//    if (Math.abs(val) > 1) {
+//        console.log("Illegal motor value: " + String(val) + ". Should be float in [-1,1]");
+//        return;
+//    }
+//
+//    console.log("Outgoing update: (" + id + ", " + val + ")");
+//    // inSocket.send(String(id) + String(val));
+//}
